@@ -1,0 +1,4 @@
+TODO for Weiwei Jia
+===================
+1, Modify "delete from table where id=*;" to "delete from
+table where id >(<) *".
