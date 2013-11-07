@@ -1,7 +1,4 @@
 #!/bin/bash
-# Weiwei Jia <harryxiyou@gmail.com>
-# Create directories and files oceanbase needs
-rm -r /home/admin/oceanbase/data
 mkdir -p /home/admin/oceanbase/data
 mkdir -p /home/admin/oceanbase/data/rs
 mkdir -p /home/admin/oceanbase/data/rs_commitlog
@@ -18,7 +15,6 @@ ln -s /data/5 /home/admin/oceanbase/data/ups_data/raid2/store0
 ln -s /data/6 /home/admin/oceanbase/data/ups_data/raid2/store1
 ln -s /data/7 /home/admin/oceanbase/data/ups_data/raid3/store0
 ln -s /data/8 /home/admin/oceanbase/data/ups_data/raid3/store1
-sudo rm -r /data
 sudo mkdir /data
 sudo chown admin /data
 for disk in {1..8}; do mkdir -p /data/$disk/obtest/sstable; done;
