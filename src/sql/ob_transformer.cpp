@@ -328,6 +328,7 @@ int ObTransformer::get_stmt(
 {
   int& ret = err_stat.err_code_ = OB_SUCCESS;
   /* get statement */
+  TBSYS_LOG(DEBUG, "999 enter func %s\n", __func__);
   if (query_id == OB_INVALID_ID)
     stmt = dynamic_cast<T*>(logical_plan->get_main_stmt());
   else
@@ -373,6 +374,7 @@ int ObTransformer::gen_physical_select(
   ObSelectStmt  *select_stmt = NULL;
   ObPhyOperator *result_op = NULL;
 
+  TBSYS_LOG(DEBUG, "999 enter func %s\n", __func__);
   /* get statement */
   if ((ret = get_stmt(logical_plan, err_stat, query_id, select_stmt)) != OB_SUCCESS)
   {
@@ -392,6 +394,7 @@ int ObTransformer::gen_physical_select(
   else
   {
     ObSelectStmt::SetOperator set_type = select_stmt->get_set_op();
+  	TBSYS_LOG(DEBUG, "999 select_stmt %p\n", select_stmt);
     if (set_type != ObSelectStmt::NONE)
     {
       ObSetOperator *set_op = NULL;
@@ -401,6 +404,7 @@ int ObTransformer::gen_physical_select(
         {
           case ObSelectStmt::UNION :
           {
+  					TBSYS_LOG(DEBUG, "999 enter case 1");
             ObMergeUnion *union_op = NULL;
             CREATE_PHY_OPERRATOR(union_op, ObMergeUnion, physical_plan, err_stat);
             set_op = union_op;
@@ -408,6 +412,7 @@ int ObTransformer::gen_physical_select(
           }
           case ObSelectStmt::INTERSECT :
           {
+  					TBSYS_LOG(DEBUG, "999 enter case 2");
             ObMergeIntersect *intersect_op = NULL;
             CREATE_PHY_OPERRATOR(intersect_op, ObMergeIntersect, physical_plan, err_stat);
             set_op = intersect_op;
@@ -415,6 +420,7 @@ int ObTransformer::gen_physical_select(
           }
           case ObSelectStmt::EXCEPT :
           {
+  					TBSYS_LOG(DEBUG, "999 enter case 3");
             ObMergeExcept *except_op = NULL;
             CREATE_PHY_OPERRATOR(except_op, ObMergeExcept, physical_plan, err_stat);
             set_op = except_op;
@@ -425,6 +431,7 @@ int ObTransformer::gen_physical_select(
         }
         if (OB_SUCCESS == ret)  // ret is a reference to err_stat.err_code_
         {
+  					TBSYS_LOG(DEBUG, "999 enter case 5");
           set_op->set_distinct(select_stmt->is_set_distinct() ? true : false);
         }
       }
@@ -432,6 +439,7 @@ int ObTransformer::gen_physical_select(
       int32_t ridx = OB_INVALID_INDEX;
       if (ret == OB_SUCCESS)
       {
+  			TBSYS_LOG(DEBUG, "999 enter case 6");
         ret = gen_physical_select(
                  logical_plan,
                  physical_plan,
@@ -441,6 +449,7 @@ int ObTransformer::gen_physical_select(
       }
       if (ret == OB_SUCCESS)
       {
+  			TBSYS_LOG(DEBUG, "999 enter case 7");
         ret = gen_physical_select(
                  logical_plan,
                  physical_plan,
@@ -451,6 +460,7 @@ int ObTransformer::gen_physical_select(
 
       if (ret == OB_SUCCESS)
       {
+  			TBSYS_LOG(DEBUG, "999 enter case 8");
         ObPhyOperator *left_op = physical_plan->get_phy_query(lidx);
         ObPhyOperator *right_op = physical_plan->get_phy_query(ridx);
         ObSelectStmt *lselect = dynamic_cast<ObSelectStmt*>(logical_plan->get_query(select_stmt->get_left_query_id()));
@@ -1641,6 +1651,7 @@ int ObTransformer::gen_phy_tables(
   ObPhyOperator *table_op = NULL;
   ObBitSet<> bit_set;
 
+  TBSYS_LOG(DEBUG, "999 enter func %s\n", __func__);
   int32_t num = select_stmt->get_select_item_size();
   for (int32_t i = 0; ret == OB_SUCCESS && i < num; i++)
   {
@@ -1859,6 +1870,7 @@ int ObTransformer::gen_phy_table(
   ObBitSet<> table_bitset;
   int32_t num = 0;
 
+  TBSYS_LOG(DEBUG, "999 enter func %s\n", __func__);
   if (table_id == OB_INVALID_ID || (table_item = stmt->get_table_item_by_id(table_id)) == NULL)
   {
     ret = OB_ERR_ILLEGAL_ID;
@@ -1892,6 +1904,7 @@ int ObTransformer::gen_phy_table(
         /* get through */
       case TableItem::ALIAS_TABLE:
       {
+  			TBSYS_LOG(DEBUG, "999 run case ALIAS_TABLE");
         ObTableRpcScan *table_rpc_scan_op = NULL;
         CREATE_PHY_OPERRATOR(table_rpc_scan_op, ObTableRpcScan, physical_plan, err_stat);
         if (ret == OB_SUCCESS
@@ -4949,6 +4962,31 @@ int ObTransformer::gen_physical_insert_new(
   return ret;
 }
 
+#if 0
+int check_scan_get(const common::ObRpcScanHint &hint) {
+//Added by Weiwei Jia
+  int& ret = err_stat.err_code_ = OB_SUCCESS;
+  TBSYS_LOG(INFO, "999 enter func %s", __func__);
+  ObSqlReadStrategy sql_read_strategy;
+
+  
+  int32_t read_method = ObSqlReadStrategy::USE_SCAN;
+  ObArray<ObRowkey> rowkey_array;
+  PageArena<ObObj,ModulePageAllocator> rowkey_objs_allocator(
+      PageArena<ObObj, ModulePageAllocator>::DEFAULT_PAGE_SIZE,ModulePageAllocator(ObModIds::OB_SQL_TRANSFORMER));
+  if (OB_SUCCESS != (ret = sql_read_strategy.get_read_method(rowkey_array, rowkey_objs_allocator, read_method))) {
+    TBSYS_LOG(WARN, "999 fail to get read method:ret[%d]", ret);
+  } else {
+    TBSYS_LOG(INFO, "use [%s] method", read_method == ObSqlReadStrategy::USE_SCAN ? "SCAN" : "GET");
+  }
+  TBSYS_LOG(INFO, "999 enter func %s", __func__);
+  hint.read_method_ = read_method;
+  TBSYS_LOG(INFO, "999 hint.read_method_ is %d\n", read_method);
+//End here
+  return OB_SUCCESS;
+}
+#endif
+
 int ObTransformer::gen_phy_table_for_update(
     ObLogicalPlan *logical_plan,
     ObPhysicalPlan*& physical_plan,
@@ -4978,7 +5016,30 @@ int ObTransformer::gen_phy_table_for_update(
 
   bool has_other_cond = false;
   ObRpcScanHint hint;
-  hint.read_method_ = ObSqlReadStrategy::USE_GET;
+//Added by Weiwei Jia
+//  hint.read_method_ = ObSqlReadStrategy::USE_GET;
+  ObSqlReadStrategy sql_read_strategy;
+  hint.only_frozen_version_data_ = true;
+  hint.is_get_skip_empty_row_ = false;
+#if 0
+//Added by Weiwei Jia
+  ObSqlReadStrategy sql_read_strategy;
+
+  int32_t read_method = ObSqlReadStrategy::USE_SCAN;
+  ObArray<ObRowkey> rowkey_array;
+  TBSYS_LOG(INFO, "999 enter func %s", __func__);
+  PageArena<ObObj,ModulePageAllocator> rowkey_objs_allocator(
+      PageArena<ObObj, ModulePageAllocator>::DEFAULT_PAGE_SIZE,ModulePageAllocator(ObModIds::OB_SQL_TRANSFORMER));
+  if (OB_SUCCESS != (ret = sql_read_strategy.get_read_method(rowkey_array, rowkey_objs_allocator, read_method))) {
+    TBSYS_LOG(WARN, "999 fail to get read method:ret[%d]", ret);
+  } else {
+    TBSYS_LOG(INFO, "use [%s] method", read_method == ObSqlReadStrategy::USE_SCAN ? "SCAN" : "GET");
+  }
+  TBSYS_LOG(INFO, "999 enter func %s", __func__);
+  hint.read_method_ = read_method;
+  TBSYS_LOG(INFO, "999 hint.read_method_ is %d\n", read_method);
+//End here
+#endif //end if
   hint.only_frozen_version_data_ = true;
   hint.is_get_skip_empty_row_ = false;
 
@@ -4996,9 +5057,59 @@ int ObTransformer::gen_phy_table_for_update(
   else if ((ret = table_rpc_scan_op->set_table(table_item->table_id_, table_item->ref_id_)) != OB_SUCCESS)
   {
     TRANS_LOG("ObTableRpcScan set table failed");
+  } else { //added by Weiwei Jia, check get/scan protocol for delete statement
+#if 1
+     ObBitSet<> table_bitset;
+    if (OB_SUCCESS == ret) {
+      int32_t bit_index = stmt->get_table_bit_index(table_item->table_id_);
+      table_bitset.add_member(bit_index);
+
+      const ObTableSchema *table_schema = NULL;
+      if (NULL == (table_schema = sql_context_->schema_manager_->get_table_schema(table_item->ref_id_))) {
+        ret = OB_ERROR;
+        TRANS_LOG("Fail to get table schema for table[%ld]", table_item->ref_id_);
+      } else {
+        sql_read_strategy.set_rowkey_info(table_schema->get_rowkey_info());
+      }
+     
+    int32_t num = stmt->get_condition_size();
+    for (int32_t i = 0; ret == OB_SUCCESS && i < num; i++) {
+      ObSqlRawExpr *cnd_expr = logical_plan->get_expr(stmt->get_condition_id(i));
+      if (cnd_expr && table_bitset.is_superset(cnd_expr->get_tables_set())) {
+        cnd_expr->set_applied(true);
+        ObSqlExpression filter;
+        if ((ret = cnd_expr->fill_sql_expression(filter, this, logical_plan, physical_plan)) != OB_SUCCESS) {
+          TRANS_LOG("Add table filter condition faild");
+          break;
+        }
+        else if (OB_SUCCESS != (ret = sql_read_strategy.add_filter(filter))) {
+          TBSYS_LOG(WARN, "fail to add filter:ret[%d]", ret);
+        }
+      }
+    }
+        //Added by Weiwei Jia
+    TBSYS_LOG(INFO, "999 enter func %s", __func__);
+  
+    int32_t read_method = ObSqlReadStrategy::USE_GET;
+    ObArray<ObRowkey> rowkey_array;
+    PageArena<ObObj,ModulePageAllocator> rowkey_objs_allocator(
+        PageArena<ObObj, ModulePageAllocator>::DEFAULT_PAGE_SIZE,ModulePageAllocator(ObModIds::OB_SQL_TRANSFORMER));
+    if (OB_SUCCESS != (ret = sql_read_strategy.get_read_method(rowkey_array, rowkey_objs_allocator, read_method))) {
+      TBSYS_LOG(WARN, "999 fail to get read method:ret[%d]", ret);
+    } else {
+      TBSYS_LOG(INFO, "use [%s] method", read_method == ObSqlReadStrategy::USE_SCAN ? "SCAN" : "GET");
+    }
+    TBSYS_LOG(INFO, "999 enter func %s", __func__);
+    hint.read_method_ = read_method;
+    //hint.read_method_ = ObSqlReadStrategy::USE_GET;
+    TBSYS_LOG(INFO, "999 hint.read_method_ is %d\n", read_method);
+    //End here
+#endif //end if
+    }
   }
-  else if (OB_SUCCESS != (ret = table_rpc_scan_op->init(sql_context_, hint)))
-  {
+//End added by Weiwei Jia
+//  else if (OB_SUCCESS != (ret = table_rpc_scan_op->init(sql_context_, hint)))
+  if (OB_SUCCESS != (ret = table_rpc_scan_op->init(sql_context_, hint))) {
     TRANS_LOG("ObTableRpcScan init failed");
   }
   else if (NULL == CREATE_PHY_OPERRATOR(tmp_table, ObValues, physical_plan, err_stat))
@@ -5120,6 +5231,7 @@ int ObTransformer::gen_phy_table_for_update(
         }
       }
     } // end for
+#if 0 //Added by Weiwei Jia, for delete statement
     if (OB_LIKELY(OB_SUCCESS == ret))
     {
       int64_t rowkey_col_num = rowkey_info.get_size();
@@ -5139,6 +5251,7 @@ int ObTransformer::gen_phy_table_for_update(
         }
       } // end for
     }
+#endif //End added by Weiwei Jia
   }
   if (OB_LIKELY(OB_SUCCESS == ret))
   {
@@ -5638,6 +5751,14 @@ int ObTransformer::gen_physical_delete_new(
       }
     }
   }
+//Added by Weiwei Jia
+#if 0
+  ObPhyOperator *result_op = NULL;
+  if (ret == OB_SUCCESS) {
+    ret = gen_phy_limit(logical_plan, physical_plan, err_stat, delete_stmt, result_op, result_op);
+  }
+#endif
+//End added by Weiwei Jia
   if (OB_LIKELY(OB_SUCCESS == ret))
   {
     ObPhyOperator* table_op = NULL;
@@ -5856,6 +5977,7 @@ int ObTransformer::gen_phy_select_for_update(
     int32_t* index)
 {
   int &ret = err_stat.err_code_ = OB_SUCCESS;
+  TBSYS_LOG(DEBUG, "999 enter func %s\n", __func__);
   ObSelectStmt *select_stmt = NULL;
   ObPhyOperator *result_op = NULL;
   //ObLockFilter *lock_op = NULL;
