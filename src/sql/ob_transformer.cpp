@@ -5003,7 +5003,7 @@ int ObTransformer::gen_phy_table_for_update(
   ObTableRpcScan *table_rpc_scan_op = NULL;
   ObFilter *filter_op = NULL;
   ObIncScan *inc_scan_op = NULL;
-  ObMultipleGetMerge *fuse_op = NULL;
+  ObMultipleScanMerge *fuse_op = NULL; //Added by Weiwei Jia; ObMultipleGetMerge->ObMultipleScanMerge
   ObMemSSTableScan *static_data = NULL;
   ObValues *tmp_table = NULL;
   ObRowDesc rowkey_col_map;
@@ -5128,8 +5128,8 @@ int ObTransformer::gen_phy_table_for_update(
   }
   else if (NULL == CREATE_PHY_OPERRATOR(inc_scan_op, ObIncScan, physical_plan, err_stat))
   {
-  }
-  else if (NULL == CREATE_PHY_OPERRATOR(fuse_op, ObMultipleGetMerge, physical_plan, err_stat))
+  } //Added by Weiwei Jia; ObMultipleGetMerge->ObMultipleScanMerge
+  else if (NULL == CREATE_PHY_OPERRATOR(fuse_op, ObMultipleScanMerge, physical_plan, err_stat))
   {
   }
   else if (NULL == CREATE_PHY_OPERRATOR(static_data, ObMemSSTableScan, physical_plan, err_stat))
