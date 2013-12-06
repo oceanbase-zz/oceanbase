@@ -5153,8 +5153,31 @@ int ObTransformer::gen_phy_table_for_update(
   {
     fuse_op->set_is_ups_row(false);
 
-    inc_scan_op->set_scan_type(ObIncScan::ST_MGET);
+    inc_scan_op->set_scan_type(ObIncScan::ST_MGET); //added by Weiwei Jia; ST_MGET->ST_SCAN
     inc_scan_op->set_write_lock_flag();
+#if 1 //added by Weiwei Jia
+    ObScanParam *scan_param = new ObScanParam();
+    ObNewRange range;
+    bool found;
+    if (OB_SUCCESS != (ret = sql_read_strategy.find_scan_range(range, found, false))) {
+      TBSYS_LOG(WARN, "failed to find_scan_range, err=%d", ret);
+    }
+/*
+    const ObTableSchema *table_schema = NULL;
+    if (NULL == (table_schema = sql_context_->schema_manager_->get_table_schema(table_item->ref_id_))) {
+      ret = OB_ERROR;
+      TRANS_LOG("Fail to get table schema for table[%ld]", table_item->ref_id_);
+    } else {
+      sql_read_strategy.set_rowkey_info(table_schema->get_rowkey_info());
+    }
+    const char *table_name = table_schema->get_table_name();
+*/
+    if (OB_SUCCESS != (ret = scan_param->set(table_id, cell_info.table_name_, range))) {
+      TBSYS_LOG(WARN, "failed to set_table_id, err=%d", ret);
+    }
+    //scan_param.set_range(range);
+    inc_scan_op->set_scan_param(scan_param);
+#endif //end added by Weiwei Jia
     inc_scan_op->set_values(get_param_values, false);
 
     static_data->set_tmp_table(tmp_table);
@@ -5231,7 +5254,6 @@ int ObTransformer::gen_phy_table_for_update(
         }
       }
     } // end for
-#if 0 //Added by Weiwei Jia, for delete statement
     if (OB_LIKELY(OB_SUCCESS == ret))
     {
       int64_t rowkey_col_num = rowkey_info.get_size();
@@ -5243,15 +5265,16 @@ int ObTransformer::gen_phy_table_for_update(
           TRANS_LOG("Failed to get column id, err=%d", ret);
           break;
         }
+#if 0 //Added by Weiwei Jia, for delete statement
         else if (OB_INVALID_INDEX == rowkey_col_map.get_idx(OB_INVALID_ID, cid))
         {
           TRANS_LOG("Primary key column %lu not specified in the WHERE clause", cid);
           ret = OB_ERR_LACK_OF_ROWKEY_COL;
           break;
         }
+#endif //End added by Weiwei Jia
       } // end for
     }
-#endif //End added by Weiwei Jia
   }
   if (OB_LIKELY(OB_SUCCESS == ret))
   {

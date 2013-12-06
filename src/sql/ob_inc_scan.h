@@ -115,6 +115,7 @@ namespace oceanbase
         int64_t get_serialize_size() const;
         void set_scan_type(const ScanType scan_type) { scan_type_ = scan_type; }
         void set_values(ObExprValues *values, bool with_only_rowkey) {values_ = values; cons_get_param_with_rowkey_ = with_only_rowkey;};
+        void set_scan_param(ObScanParam *scan_param) {scan_param_ = scan_param;};
         common::ObGetParam* get_get_param();
         common::ObScanParam* get_scan_param();
       private:
