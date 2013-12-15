@@ -808,10 +808,12 @@ namespace oceanbase
 
 
       // table name or id
+      TBSYS_LOG(INFO, "9990 table_name length is %d\n", table_name_.length());
       if (OB_SUCCESS == ret)
       {
         if (table_name_.length() > 0)
         {
+          TBSYS_LOG(INFO, "9991 table_name length is %d\n", table_name_.length());
           if (OB_INVALID_ID == table_id_)
           {
             obj.set_varchar(table_name_);
@@ -823,17 +825,21 @@ namespace oceanbase
         }
         else
         {
+          TBSYS_LOG(INFO, "9992 table_name length is %d\n", table_name_.length());
           if (OB_INVALID_ID != table_id_)
           {
+            TBSYS_LOG(INFO, "9993 table_name length is %d\n", table_name_.length());
             obj.set_int(table_id_);
           }
           else
           {
+            TBSYS_LOG(INFO, "9994 table_name length is %d\n", table_name_.length());
             ret = OB_ERROR;
           }
         }
         if (OB_SUCCESS != ret)
         {
+          TBSYS_LOG(INFO, "9995 table_name length is %d\n", table_name_.length());
           TBSYS_LOG(WARN, "Both table_name and table_id are set");
         }
         else

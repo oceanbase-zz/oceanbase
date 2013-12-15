@@ -5158,13 +5158,13 @@ int ObTransformer::gen_phy_table_for_update(
 #if 1 //added by Weiwei Jia
     ObScanParam *scan_param = NULL;
     ObString table_name;
+    TBSYS_LOG(INFO, "999 table_name length is %d\n", table_name.length());
     scan_param = OB_NEW(ObScanParam, ObModIds::OB_SCAN_PARAM);
     if (NULL == scan_param) {
       TBSYS_LOG(WARN, "no memory");
       ret = OB_ALLOCATE_MEMORY_FAILED;
     }
     ObNewRange range;
-    ObVersionRange vrange;
     bool found;
     if (OB_SUCCESS != (ret = sql_read_strategy.find_scan_range(range, found, false))) {
       TBSYS_LOG(WARN, "failed to find_scan_range, err=%d", ret);
@@ -5182,7 +5182,7 @@ int ObTransformer::gen_phy_table_for_update(
     if (OB_SUCCESS != (ret = scan_param->set(table_id, table_name, range))) {
       TBSYS_LOG(WARN, "failed to set_table_id, err=%d", ret);
     }
-    scan_param->set_range(range);
+    //scan_param->set_range(range);
     inc_scan_op->set_scan_param(scan_param);
 #endif //end added by Weiwei Jia
     //inc_scan_op->set_values(get_param_values, false);
