@@ -5157,6 +5157,7 @@ int ObTransformer::gen_phy_table_for_update(
     inc_scan_op->set_write_lock_flag();
 #if 1 //added by Weiwei Jia
     ObScanParam *scan_param = NULL;
+    ObString table_name;
     scan_param = OB_NEW(ObScanParam, ObModIds::OB_SCAN_PARAM);
     if (NULL == scan_param) {
       TBSYS_LOG(WARN, "no memory");
@@ -5178,7 +5179,7 @@ int ObTransformer::gen_phy_table_for_update(
     }
     const char *table_name = table_schema->get_table_name();
 */
-    if (OB_SUCCESS != (ret = scan_param->set(table_id, cell_info.table_name_, range))) {
+    if (OB_SUCCESS != (ret = scan_param->set(table_id, table_name, range))) {
       TBSYS_LOG(WARN, "failed to set_table_id, err=%d", ret);
     }
     scan_param->set_range(range);
