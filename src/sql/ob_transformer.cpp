@@ -5141,6 +5141,7 @@ int ObTransformer::gen_phy_table_for_update(
   else if (OB_SUCCESS != (ret = fuse_op->set_child(1, *inc_scan_op)))
   {
   }
+#if 1
   else if (NULL == CREATE_PHY_OPERRATOR(get_param_values, ObExprValues, physical_plan, err_stat))
   {
     ret = OB_ALLOCATE_MEMORY_FAILED;
@@ -5149,6 +5150,7 @@ int ObTransformer::gen_phy_table_for_update(
   {
     TBSYS_LOG(WARN, "failed to add sub query, err=%d", ret);
   }
+#endif
   else
   {
     fuse_op->set_is_ups_row(false);
@@ -5165,6 +5167,12 @@ int ObTransformer::gen_phy_table_for_update(
       ret = OB_ALLOCATE_MEMORY_FAILED;
     }
     ObNewRange range;
+    ObVersionRange vrange;
+    vrange.border_flag_.set_inclusive_start();
+    vrange.border_flag_.set_max_value();
+    vrange.start_version_ = physical_plan->get_curr_frozen_version() + 1;
+    //vrange.start_version_ = 1;
+    scan_param->set_version_range(vrange);
     bool found;
     if (OB_SUCCESS != (ret = sql_read_strategy.find_scan_range(range, found, false))) {
       TBSYS_LOG(WARN, "failed to find_scan_range, err=%d", ret);
@@ -5189,9 +5197,12 @@ int ObTransformer::gen_phy_table_for_update(
 
     static_data->set_tmp_table(tmp_table);
 
+    TBSYS_LOG(INFO, "999 Rowkey cell count is %lu\n", row_desc.get_rowkey_cell_count());
     table_rpc_scan_op->set_rowkey_cell_count(row_desc.get_rowkey_cell_count());
+    //table_rpc_scan_op->set_rowkey_cell_count((int64_t) 5);
 
     get_param_values->set_row_desc(row_desc, row_desc_ext);
+    TBSYS_LOG(INFO, "999 Row desc ext addr is %p\n", &row_desc_ext);
     // set filters
     int32_t num = stmt->get_condition_size();
     uint64_t cid = OB_INVALID_ID;
