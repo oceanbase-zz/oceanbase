@@ -1,1 +1,15 @@
 some scripts for remove, create, compile, init OB
+install
+=======
+env GIT_SSL_NO_VERIFY=true git clone https://github.com/oceanbase/oceanbase.git
+sh build.sh init
+./configure --prefix=/home/admin/oceanbase --with-release=yes --with-test-case=no;
+
+chmod +x ./recompile.sh
+./recompile.sh 
+chmod +x ./dir_create.sh 
+./dir_create.sh 
+chmod +x ./start_ob.sh 
+./start_ob.sh
+
+mysql -h 192.168.1.131 -P2880 -uadmin -padmin
